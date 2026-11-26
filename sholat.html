@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Masjid Ultra Premium - V2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Montserrat:wght@700;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #10b981;
+            --deep-emerald: #022c22;
+            --gold-accent: #f59e0b;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff;
+        }
+
+        body {
+            background-color: #022c22;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(245, 158, 11, 0.07) 1px, transparent 0),
+                linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            background-size: 50px 50px, 100% 100%;
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .page-section {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100vh;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+        }
+
+        .active-page { display: flex; opacity: 1; }
+
+        /* --- HALAMAN 1: DISPLAY UTAMA --- */
+        .header {
+            height: 20vh;
+            padding: 0 6vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mosque-info h1, #next-prayer-label {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #f59e0b 0%, #f59e0b 40%, #ffffff 50%, #f59e0b 60%, #f59e0b 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine-sweep 3s linear infinite;
+        }
+
+        @keyframes shine-sweep { to { background-position: 200% center; } }
+
+        .clock-box { background: rgba(0, 0, 0, 0.2); padding: 1.5vh 3vw; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
+        #time { font-family: 'Montserrat', sans-serif; font-size: 6vw; font-weight: 900; line-height: 1; }
+        
+        .prayer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2.5vw; width: 92%; margin: auto; }
+        .card { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(15px); 
+            border-radius: 40px; 
+            padding: 5vh 1vw; 
+            text-align: center; 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            position: relative;
+            transition: all 0.5s ease;
+        }
+        .card h2 { font-size: 1.6vw; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; letter-spacing: 2px; margin: 0; }
+        .card .prayer-time { font-family: 'Montserrat', sans-serif; font-size: 5vw; font-weight: 900; margin-top: 1.5vh; }
+        
+        /* LABEL SHOLAT SELANJUTNYA (TETAP ADA) */
+        .card.active { 
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.4)); 
+            border: 2px solid var(--primary-green); 
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+            transform: scale(1.1) translateY(-10px);
+        }
+        .card.active::before {
+            content: "Sholat Berikutnya";
+            position: absolute;
+            top: -20px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold-accent);
+            color: #022c22;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9vw;
+            font-weight: 800;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .card.active h2 { color: var(--gold-accent); opacity: 1; }
+
+        /* --- HALAMAN 2: COUNTDOWN --- */
+        .countdown-container { margin: auto; text-align: center; }
+        #next-prayer-label { font-size: 5.5vw; font-weight: 900; text-transform: uppercase; filter: drop-shadow(0 0 15px rgba(245,158,11,0.4)); }
+        .timer-wrapper { display: flex; gap: 2.5vw; justify-content: center; margin-top: 4vh; }
+        .timer-box { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(25px); border-radius: 50px; padding: 5vh 3.5vw; min-width: 12vw; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .timer-value { font-family: 'Montserrat', sans-serif; font-size: 8vw; font-weight: 900; text-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+        .timer-label { color: var(--gold-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 4px; display: block; margin-top: 10px; font-size: 1.2vw; }
+
+        /* --- HALAMAN 3: KATA-KATA (UKURAN DIPERBAIKI) --- */
+        .quote-container { flex: 1; display: flex; align-items: center; padding: 0 12%; }
+        #quote-box { display: flex; flex-wrap: wrap; gap: 10px 25px; max-width: 1100px; }
+        .word { font-size: 55px; font-weight: 800; opacity: 0; text-shadow: 0 5px 15px rgba(0,0,0,0.3); line-height: 1.2; }
+        .word.emas { font-family: 'Dancing Script', cursive; font-size: 65px; color: var(--gold-accent); 
+            background: linear-gradient(to right, #f59e0b 0%, #f59e0b 40%, #ffffff 50%, #f59e0b 60%, #f59e0b 100%);
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shine-sweep 3s linear infinite; display: inline-block; padding: 0 10px;
+        }
+
+        .footer { height: 8vh; background: var(--gold-accent); display: flex; align-items: center; color: #064e3b; font-size: 2vw; font-weight: 800; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <section id="page-1" class="page-section active-page">
+        <div class="header">
+            <div class="mosque-info">
+                <h1>Masjid Jami' Wlingi</h1>
+                <p style="font-size: 1.2vw; color: rgba(255,255,255,0.5); margin-top: 5px; letter-spacing: 1px;">Blitar, Jawa Timur</p>
+            </div>
+            <div class="clock-box">
+                <div id="time">00:00:00</div>
+                <div id="date">MEMUAT...</div>
+            </div>
+        </div>
+        <div style="flex:1; display:flex; align-items:center;">
+            <div class="prayer-grid">
+                <div class="card" id="card-Fajr"><h2>Subuh</h2><div class="prayer-time" id="Fajr">--:--</div></div>
+                <div class="card" id="card-Dhuhr"><h2>Dzuhur</h2><div class="prayer-time" id="Dhuhr">--:--</div></div>
+                <div class="card" id="card-Asr"><h2>Ashar</h2><div class="prayer-time" id="Asr">--:--</div></div>
+                <div class="card" id="card-Maghrib"><h2>Maghrib</h2><div class="prayer-time" id="Maghrib">--:--</div></div>
+                <div class="card" id="card-Isha"><h2>Isya</h2><div class="prayer-time" id="Isha">--:--</div></div>
+            </div>
+        </div>
+        <div class="footer"><marquee scrollamount="10">JAGALAH KEBERSIHAN MASJID • NONAKTIFKAN TELEPON GENGGAM • RAPATKAN SHAF SHALAT • SELAMAT BERIBADAH DI MASJID JAMI' WLINGI</marquee></div>
+    </section>
+
+    <section id="page-2" class="page-section">
+        <div class="countdown-container">
+            <div id="next-prayer-label">MENJELANG SHOLAT</div>
+            <div class="timer-wrapper">
+                <div class="timer-box"><span class="timer-value" id="hours">00</span><span class="timer-label">Jam</span></div>
+                <div class="timer-box"><span class="timer-value" id="minutes">00</span><span class="timer-label">Menit</span></div>
+                <div class="timer-box"><span class="timer-value" id="seconds">00</span><span class="timer-label">Detik</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-3" class="page-section">
+        <div style="position:absolute; left:0; top:25%; width:6px; height:50%; background:var(--gold-accent); border-radius:0 5px 5px 0;"></div>
+        <div class="quote-container">
+            <div id="quote-box"></div>
+        </div>
+    </section>
+
+    <script>
+        let targetPrayerTime = null;
+        let quoteIndex = 0;
+        const quotesRaw = [
+            "Jangan jauh dari *Allah, karena hanya Dia tempat kembali.",
+            "Saat dunia membuatmu lelah, ingatlah Allah tidak pernah *meninggalkanmu.",
+            "Pada akhirnya, yang kita butuhkan bukan dunia yang sempurna, tetapi hati yang *dekat dengan-Nya.",
+            "Jangan sampai kita mengenal dunia dengan baik, tapi *asing dengan Tuhan sendiri.",
+            "Hakikat *Sujud Adalah Meletakkan Dunia Di Bawah Kaki"
+        ];
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('time').innerText = now.toLocaleTimeString('id-ID', { hour12: false }).replace(/\./g, ':');
+            document.getElementById('date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+        }
+
+        async function fetchPrayer() {
+    try {
+        const now = new Date();
+        const bulan = now.getMonth() + 1;
+        const tahun = now.getFullYear();
+        const tanggal = now.getDate();
+
+        const cacheKey = `jadwal_${bulan}_${tahun}`;
+        let jadwal = localStorage.getItem(cacheKey);
+
+        // =========================
+        // CEK CACHE DULU
+        // =========================
+        if (jadwal) {
+            jadwal = JSON.parse(jadwal);
+        } else {
+            // =========================
+            // JIKA TIDAK ADA CACHE → FETCH API
+            // =========================
+            const response = await fetch("https://equran.id/api/v2/shalat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    provinsi: "Jawa Timur",
+                    kabkota: "Kab. Blitar",
+                    bulan: bulan,
+                    tahun: tahun
+                })
+            });
+
+            const data = await response.json();
+            jadwal = data.data.jadwal;
+
+            // SIMPAN 1 BULAN KE CACHE
+            localStorage.setItem(cacheKey, JSON.stringify(jadwal));
+        }
+
+        const todayData = jadwal.find(item => parseInt(item.tanggal) === tanggal);
+        if (!todayData) return;
+
+        const timings = {
+            Fajr: todayData.subuh,
+            Dhuhr: todayData.dzuhur,
+            Asr: todayData.ashar,
+            Maghrib: todayData.maghrib,
+            Isha: todayData.isya
+        };
+
+        const prayers = {
+            Fajr: 'Subuh',
+            Dhuhr: 'Dzuhur',
+            Asr: 'Ashar',
+            Maghrib: 'Maghrib',
+            Isha: 'Isya'
+        };
+
+        let foundNext = false;
+
+        Object.keys(prayers).forEach(key => {
+            document.getElementById(key).innerText = timings[key];
+
+            const [h, m] = timings[key].split(':');
+            const pDate = new Date();
+            pDate.setHours(parseInt(h), parseInt(m), 0);
+
+            document.getElementById('card-' + key).classList.remove('active');
+
+            if (!foundNext && pDate > now) {
+                targetPrayerTime = pDate;
+                document.getElementById('card-' + key).classList.add('active');
+                document.getElementById('next-prayer-label').innerText =
+                    "MENJELANG SHOLAT " + prayers[key];
+                foundNext = true;
+            }
+        });
+
+        // Jika semua waktu hari ini sudah lewat → set ke Subuh besok
+        if (!foundNext) {
+            const [h, m] = timings["Fajr"].split(':');
+            targetPrayerTime = new Date();
+            targetPrayerTime.setDate(targetPrayerTime.getDate() + 1);
+            targetPrayerTime.setHours(parseInt(h), parseInt(m), 0);
+            document.getElementById('card-Fajr').classList.add('active');
+        }
+
+    } catch (error) {
+        console.error("Error ambil jadwal:", error);
+    }
+}
+        
+        function updateCountdown() {
+            if (!targetPrayerTime) return;
+            const diff = targetPrayerTime - new Date();
+            if (diff <= 0) { fetchPrayer(); return; }
+            const h = Math.floor(diff/3600000);
+            const m = Math.floor((diff%3600000)/60000);
+            const s = Math.floor((diff%60000)/1000);
+            document.getElementById('hours').innerText = h.toString().padStart(2,'0');
+            document.getElementById('minutes').innerText = m.toString().padStart(2,'0');
+            document.getElementById('seconds').innerText = s.toString().padStart(2,'0');
+        }
+
+        function animateQuote(onAllComplete) {
+            const box = document.getElementById("quote-box");
+            box.innerHTML = "";
+            const words = quotesRaw[quoteIndex].split(" ");
+            words.forEach(w => {
+                const span = document.createElement("span");
+                span.className = w.startsWith("*") ? "word emas" : "word";
+                span.innerText = w.startsWith("*") ? w.substring(1) : w;
+                box.appendChild(span);
+            });
+            gsap.fromTo(".word", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" });
+
+            setTimeout(() => {
+                gsap.to(".word", { opacity: 0, y: -20, duration: 0.6, stagger: 0.05, onComplete: () => {
+                    quoteIndex++;
+                    if (quoteIndex < quotesRaw.length) animateQuote(onAllComplete);
+                    else { quoteIndex = 0; onAllComplete(); }
+                }});
+            }, 7000);
+        }
+
+        function switchPage() {
+            const p1 = document.getElementById('page-1');
+            const p2 = document.getElementById('page-2');
+            const p3 = document.getElementById('page-3');
+
+            showPage(p1);
+            setTimeout(() => {
+                showPage(p2);
+                setTimeout(() => {
+                    showPage(p3);
+                    animateQuote(() => switchPage());
+                }, 15000);
+            }, 15000);
+        }
+
+        function showPage(targetPage) {
+            const active = document.querySelector('.active-page');
+            if(active) gsap.to(active, { opacity: 0, scale: 0.98, duration: 0.8, onComplete: () => active.classList.remove('active-page') });
+            setTimeout(() => {
+                targetPage.classList.add('active-page');
+                gsap.fromTo(targetPage, { opacity: 0, scale: 1.02 }, { opacity: 1, scale: 1, duration: 1 });
+            }, 800);
+        }
+
+        setInterval(updateClock, 1000);
+        setInterval(updateCountdown, 1000);
+        fetchPrayer();
+        window.onload = switchPage;
+    </script>
+</body>
+</html>
